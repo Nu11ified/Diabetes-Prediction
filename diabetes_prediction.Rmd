@@ -101,11 +101,9 @@ Boxplots help visualize the distribution and potential outliers for numerical fe
 boxplot_cols <- c('Age', 'Dietary_Intake_Calories', 'Fasting_Blood_Glucose', 'BMI', 'Alcohol_Consumption', 'Previous_Gestational_Diabetes')
 par(mfrow=c(2, 3)) # Arrange plots in a 2x3 grid
 for (col in boxplot_cols) {
-   # Boxplot for a single variable
    boxplot(df[[col]], main = paste('Box Plot of', col), ylab = col)
-   # Note: For categorical vs numeric, boxplot(Numeric ~ Factor, data = df) is standard
 }
-par(mfrow=c(1, 1)) # Reset plot layout
+par(mfrow=c(1, 1))
 ```
 
 ## Correlation Analysis
@@ -113,7 +111,6 @@ par(mfrow=c(1, 1)) # Reset plot layout
 Visualizing the correlation matrix of numerical features.
 
 ```{r correlation_heatmap, fig.width=12, fig.height=10}
-# Calculate and plot correlation heatmap
 # Select only numeric columns for correlation
 numeric_df <- df %>% select_if(is.numeric)
 corr_matrix <- cor(numeric_df, use = "complete.obs") # Handle potential NAs in numeric columns for correlation
@@ -127,7 +124,6 @@ corrplot(corr_matrix, method = "color", type = "full", order = "hclust",
 Splitting the data into training and testing sets (80/20 split).
 
 ```{r data_split}
-# Prepare data for LightGBM
 # Drop the index column (read as '...1') and 'Fasting_Blood_Glucose' from features
 X <- df %>% select(-`...1`, -Fasting_Blood_Glucose)
 y <- df$Fasting_Blood_Glucose
@@ -152,13 +148,11 @@ Train a LightGBM regressor model. Categorical features are explicitly identified
 
 ```{r lightgbm_training}
 # Train LightGBM regression model
-# Identify categorical features for LightGBM
 categorical_features_names <- c('Sex', 'Ethnicity', 'Physical_Activity_Level', 'Alcohol_Consumption', 'Smoking_Status', 'Previous_Gestational_Diabetes')
 
 # Get 0-based indices of these columns in the X_train data frame
-# Ensure columns in X_train match the data frame before splitting if column order was changed
 current_X_train_cols <- colnames(X_train)
-categorical_feature_indices <- which(current_X_train_cols %in% categorical_features_names) - 1 # -1 for 0-based index
+categorical_feature_indices <- which(current_X_train_cols %in% categorical_features_names) - 1 
 
 dtrain <- lgb.Dataset(data = as.matrix(X_train), label = y_train,
                       categorical_feature = categorical_feature_indices)
@@ -168,7 +162,7 @@ params <- list(objective = "regression", metric = "l2")
 
 model <- lgb.train(params = params,
                    data = dtrain,
-                   nrounds = 100 # You might need to tune nrounds
+                   nrounds = 100 
                    )
 ```
 
